@@ -1,2 +1,6 @@
 *.pyc
 .idea*
+images
+links
+crawler-env
+
