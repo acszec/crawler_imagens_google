@@ -5,13 +5,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 import uuid
 import os
 import progressbar
+import sys
 
 xpath_links_img = "//img[@class='n3VNCb']/@src"
 xpath_thumbs = "//a[@class='wXeWr islib nfEiy mM5pbd']"
 
-URL = "https://www.google.com/search?q=bitewing&tbm=isch&hl=en&hl=en&tbs=rimg%3ACaLAuIoxMlhQImADuZMFBjxWpzXfV52C3novyvlXA4jooohMLTci9lQPUCJR7LF6GcfFUR5GwjT60IjFDzMnAhlC2pcjnEH3YeOYwgi5BaZ87KPiGGymEqPfFXeoNUPewBw3rWlwp_1Oaq04qEgkDuZMFBjxWpxH6AX7HiPTDICoSCTXfV52C3novEWjUzYoyr_1lpKhIJyvlXA4jooogRTQMY5DyoEIIqEglMLTci9lQPUBH0dkwL3UPUsyoSCSJR7LF6GcfFEUEki2ZdkKWbKhIJUR5GwjT60IgRC71Crfg-fXAqEgnFDzMnAhlC2hE79WIqLAsSyCoSCZcjnEH3YeOYEcpzkfOub--zKhIJwgi5BaZ87KMRtopvEvtY-S4qEgniGGymEqPfFRFZv9aHGsfB3ioSCXeoNUPewBw3EaOO7Bgzlu6hKhIJrWlwp_1Oaq04R6EgzagfM3jJhesLrPRZxHu0&ved=0CBwQuIIBahcKEwiotNXI47HpAhUAAAAAHQAAAAAQCw&biw=2102&bih=947"
 default_timeout = 1
-max_images = 100
 links_folder_name = 'links'
 
 
@@ -30,6 +29,7 @@ class Crawler(object):
 
     def parse(self):
         list_thumbs = self.list_elements(xpath_thumbs)
+        total_images = len(list(enumerate(list_thumbs)))
 
         file_name = str(uuid.uuid1())
         os.makedirs(links_folder_name, exist_ok=True)
@@ -38,13 +38,10 @@ class Crawler(object):
         file = open(file_path, 'w')
 
         print(
-            f"Initializing the scraping of {max_images} images and saving in file {file_path} \n")
+            f"Initializing the scraping of {total_images} images and saving in file {file_path} \n")
 
-        with progressbar.ProgressBar(max_value=max_images) as bar:
+        with progressbar.ProgressBar(max_value=total_images) as bar:
             for i, element_thumb in enumerate(list_thumbs):
-                if i == max_images:
-                    break
-
                 try:
                     element_thumb.click()
                     time.sleep(default_timeout)
@@ -85,6 +82,18 @@ def get_link_img(html, xpath):
     return value
 
 
-crawler = Crawler()
-crawler.get(URL)
-crawler.parse()
+if __name__ == "__main__":
+    file_path = sys.argv[1]
+    print(f"Starting the crawler of all the links of file {file_path}")
+
+    if not os.path.isfile(file_path):
+        print("File path {} does not exist. Exiting...".format(file_path))
+        sys.exit()
+
+    with open(file_path) as fp:
+        urls = [url for url in enumerate(fp)]
+
+    for i, url in urls:
+        crawler = Crawler()
+        crawler.get(url)
+        crawler.parse()

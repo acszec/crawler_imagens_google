@@ -24,4 +24,4 @@
 
 ### Download all images
 
-`make download`
+`make download URLS=./links/<file_path>`

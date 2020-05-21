@@ -3,10 +3,10 @@ import os
 import sys
 import progressbar
 import hashlib
+import time
 
-
-links_file_path = 'links/00a0ce46-9ad7-11ea-9784-8c8590507634'
 images_folder_name = 'images'
+default_timeout = 0.5
 
 
 class DownloadImages:
@@ -21,6 +21,8 @@ class DownloadImages:
             urls = [url for url in enumerate(fp)]
 
         total_images = len(urls)
+        err = 0
+
         with progressbar.ProgressBar(max_value=total_images) as bar:
             for i, url in urls:
                 try:
@@ -32,8 +34,11 @@ class DownloadImages:
 
                     urllib.request.urlretrieve(url, image_file_path)
                     bar.update(i)
+                    time.sleep(default_timeout)
                 except Exception:
-                    pass
+                    err += 1
+
+        print(f"Error to process {err} from {total_images} files.")
 
     def _generate_name(self, url):
         hash_object = hashlib.sha256(url.encode('utf-8'))
@@ -41,4 +46,6 @@ class DownloadImages:
 
 
 if __name__ == "__main__":
-    DownloadImages().start(links_file_path)
+    file_path = sys.argv[1]
+    print(f"Starting the download of all the links of file {file_path}")
+    DownloadImages().start(file_path)
