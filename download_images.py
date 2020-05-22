@@ -4,14 +4,16 @@ import sys
 import progressbar
 import hashlib
 import time
+from os import listdir
+from os.path import isfile, join
 
 images_folder_name = 'images'
-default_timeout = 0.5
+default_timeout = 0.1
 
 
 class DownloadImages:
     def start(self, filepath):
-        if not os.path.isfile(filepath):
+        if not os.path.exists(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             sys.exit()
 
@@ -47,5 +49,13 @@ class DownloadImages:
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
-    print(f"Starting the download of all the links of file {file_path}")
-    DownloadImages().start(file_path)
+
+    if os.path.isdir(file_path):
+        files = [join(file_path, f)
+                 for f in listdir(file_path) if isfile(join(file_path, f))]
+    else:
+        files = [file_path]
+
+    for f in files:
+        print(f"Starting the download of all the links of file {f}")
+        DownloadImages().start(f)
