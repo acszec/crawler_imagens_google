@@ -7,7 +7,7 @@ import time
 from os import listdir
 from os.path import isfile, join
 
-images_folder_name = 'images'
+images_path = 'images'
 default_timeout = 0.1
 
 
@@ -17,10 +17,13 @@ class DownloadImages:
             print("File path {} does not exist. Exiting...".format(filepath))
             sys.exit()
 
-        os.makedirs(images_folder_name, exist_ok=True)
+        os.makedirs(images_path, exist_ok=True)
 
         with open(filepath) as fp:
             urls = [url for url in enumerate(fp)]
+
+        with open(images_path) as fp:
+            urls_to_filter = [image.slpit(".")[0] for image in enumerate(fp)]
 
         total_images = len(urls)
         err = 0
@@ -28,15 +31,19 @@ class DownloadImages:
         with progressbar.ProgressBar(max_value=total_images) as bar:
             for i, url in urls:
                 try:
-                    res = urllib.request.urlopen(url)
-                    file_type = res.info()['Content-Type'].split('/')[1]
+                    image_name = self._generate_name(url)
 
-                    image_file_path = os.path.join(
-                        images_folder_name, self._generate_name(url)) + "." + file_type
+                    if urls_to_filter not in urls_to_filter:
+                        res = urllib.request.urlopen(url)
+                        file_type = res.info()['Content-Type'].split('/')[1]
 
-                    urllib.request.urlretrieve(url, image_file_path)
+                        image_file_path = os.path.join(
+                            images_path, image_name) + "." + file_type
+
+                        urllib.request.urlretrieve(url, image_file_path)
+                        time.sleep(default_timeout)
+
                     bar.update(i)
-                    time.sleep(default_timeout)
                 except Exception:
                     err += 1
 
