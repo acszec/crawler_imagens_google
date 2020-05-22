@@ -20,14 +20,18 @@ class Crawler(object):
     name = 'images'
 
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        try:
+            self.driver = webdriver.Chrome()
+        except:
+            self.driver = webdriver.Chrome(ChromeDriverManager().install())
+
         self.driver.maximize_window()
 
     def get(self, url):
         self.driver.get(url)
 
     def list_elements(self, xpath):
-        for i in range(1,11):
+        for i in range(1, 11):
             time.sleep(2)
             self.driver.execute_script(
                 """
@@ -38,7 +42,8 @@ class Crawler(object):
             print(f"->Scrolling to bottom {i}\n")
             try:
                 time.sleep(2)
-                more_results = self.driver.find_element_by_xpath(xpath_input_more_results)
+                more_results = self.driver.find_element_by_xpath(
+                    xpath_input_more_results)
                 more_results.click()
                 print(f"->Clicking load more results\n")
             except:
