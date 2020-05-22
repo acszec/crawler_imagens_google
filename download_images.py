@@ -22,8 +22,8 @@ class DownloadImages:
         with open(filepath) as fp:
             urls = [url for url in enumerate(fp)]
 
-        with open(images_path) as fp:
-            urls_to_filter = [image.slpit(".")[0] for image in enumerate(fp)]
+        urls_to_filter = [f.split(".")[0] for f in listdir(
+            images_path) if isfile(join(images_path, f))]
 
         total_images = len(urls)
         err = 0
@@ -33,7 +33,7 @@ class DownloadImages:
                 try:
                     image_name = self._generate_name(url)
 
-                    if urls_to_filter not in urls_to_filter:
+                    if image_name not in urls_to_filter:
                         res = urllib.request.urlopen(url)
                         file_type = res.info()['Content-Type'].split('/')[1]
 
