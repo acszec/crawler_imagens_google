@@ -7,8 +7,10 @@ import os
 import progressbar
 import sys
 
-xpath_links_img = "//img[@class='n3VNCb']/@src"
+xpath_links_img = "//a[@role='link']/img[@class='n3VNCb']/@src"
 xpath_thumbs = "//a[@class='wXeWr islib nfEiy mM5pbd']"
+xpath_input_more_results = "//input[@class='mye4qd'][contains(@value, 'more results')]"
+src_default_google = ['//encrypted', 'jpeg;base64']
 
 default_timeout = 1
 links_folder_name = 'links'
@@ -18,13 +20,36 @@ class Crawler(object):
     name = 'images'
 
     def __init__(self):
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        try:
+            self.driver = webdriver.Chrome()
+        except:
+            self.driver = webdriver.Chrome(ChromeDriverManager().install())
+
         self.driver.maximize_window()
 
     def get(self, url):
         self.driver.get(url)
 
     def list_elements(self, xpath):
+        for i in range(1, 11):
+            time.sleep(2)
+            self.driver.execute_script(
+                """
+                content = document.getElementById('islmp');
+                content.scrollIntoView(false);
+                """)
+
+            print(f"->Scrolling to bottom {i}\n")
+            try:
+                time.sleep(2)
+                more_results = self.driver.find_element_by_xpath(
+                    xpath_input_more_results)
+                more_results.click()
+                print(f"->Clicking load more results\n")
+            except:
+                pass
+
+        print(f"[ Scrolling finished ]\n")
         return self.driver.find_elements_by_xpath(xpath_thumbs)
 
     def parse(self):
@@ -75,8 +100,9 @@ def extract_content(html, xpath):
 
 def get_link_img(html, xpath):
     value = ""
-    for src in html_list(html, xpath):
-        if src.startswith("http://") or src.startswith("https://"):
+    for i, src in enumerate(html_list(html, xpath)):
+        # if '.jpg' in src.lower() or '.png' in src.lower() or '.jpeg' in src.lower():
+        if src_default_google[0] not in src.lower() and src_default_google[1] not in src.lower():
             value = src
             break
     return value

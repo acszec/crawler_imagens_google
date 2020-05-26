@@ -1,5 +1,5 @@
 START_URLS?=start_urls.txt
-URLS?=./links/sample
+URLS?=./links
 
 install:
 	pip install -r requirements.txt -U
